@@ -33,17 +33,13 @@
 
 
 (defn neighbours
+  "given a board and linear positions it return the "
   [board i]
-  (let [[size _] (board-shape board)
-        ul (get board (- i size 1))
-        uc (get board (- i size))
-        ur (get board (- i size -1))
-        cl (get board (- i 1))
-        cr (get board (- i -1))
-        dl (get board (+ i size -1))
-        dc (get board (+ i size))
-        dr (get board (+ i size 1))]
-    [ul uc ur cl cr dl dc dr]))
+  (let [[size _] (board-shape board)]
+    (map (partial get board)
+         [(- i size 1)  (- i size)  (- i size -1)
+          (- i 1)          #_i      (- i -1)
+          (+ i size -1) (+ i size)  (+ i size 1)])))
 
 
 
@@ -65,20 +61,18 @@
 
 (defn cell-transition
   [board cell-index]
-  (let [nbr (neighbours board cell-index)
-        alive (->> nbr (filter #(= % :x)) count)
-        cell (get board cell-index)]
-    (case alive
+  (let [nbr       (neighbours board cell-index)
+        num-alive (->> nbr (filter #(= % :x)) count)
+        cell      (get board cell-index)]
+    (case num-alive
         2 cell
         3 :x
         :_)))
 
 
-(defn transition [board]
-  (into []
-        (map-indexed
-         (fn [i _] (cell-transition board i))
-         board)))
+(defn transition
+  [board]
+  (mapv (partial cell-transition board) (range (count board))))
 
 
 (defn display

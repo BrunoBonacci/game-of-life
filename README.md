@@ -1,10 +1,12 @@
 # game-of-life
 
-A Clojure library designed to ... well, that part is up to you.
+Code from a Clojure Dojo session to build the Conway's Game Of Life.
 
 ## Usage
 
-FIXME
+```
+lein repl
+```
 
 ## License
 
