@@ -5,7 +5,7 @@ Code from a Clojure Dojo session to build the Conway's Game Of Life.
 ## Usage
 
 ```
-lein repl
+lein run
 ```
 
 ## License
