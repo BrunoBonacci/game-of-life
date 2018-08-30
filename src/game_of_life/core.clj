@@ -3,6 +3,11 @@
   (:gen-class))
 
 (comment
+  ;;
+  ;; example of a board, assumed squared
+  ;; :_ -> empty cell
+  ;; :x -> living cell
+  ;;
   [:_ :_ :_ :_ :_ :_ :_ :_ :_ :_
    :_ :_ :_ :_ :_ :_ :_ :_ :_ :_
    :_ :_ :_ :_ :_ :_ :_ :_ :_ :_
@@ -45,6 +50,7 @@
 
 
 (comment
+  ;; returns the neighbours of :x
   (neighbours
    [:_ :_ :_ :_ :_ :_ :_ :_ :_ :_
     :_ :_ :_ :_ :_ :_ :_ :_ :_ :_
@@ -77,11 +83,15 @@
 
 
 (defn display
-  [board]
-  (let [[size _] (board-shape board)]
+  [board & {:keys [live empty sep]
+            :or {live ":x" empty ":_" sep " "}}]
+  (let [[size _] (board-shape board)
+        fmt {:_ empty
+             :x live}]
     (->> board
+       (map fmt)
        (partition size)
-       (map (partial str/join " "))
+       (map (partial str/join sep))
        (str/join "\n"))))
 
 
@@ -113,22 +123,19 @@
   (let [delay (quot 1000 rate)
         clear-screen (str "\033[2J")]
     (loop [board board]
-      (println clear-screen (display board))
+      (println clear-screen "Press Ctrl-C to stop.\n")
+      (println (display board :live "##" :empty "__" :sep "|"))
+      (println "\n\n")
       (Thread/sleep delay)
       (recur (transition board)))))
 
 
-(defn -main []
+(defn load-board
+  [file]
+  (read-string (slurp file)))
+
+
+(defn -main [& [board]]
   (term-display
-   [:_ :_ :_ :_ :_ :_ :_ :_ :_ :_
-    :_ :_ :_ :_ :_ :_ :_ :_ :_ :_
-    :_ :_ :_ :_ :_ :_ :_ :_ :_ :_
-    :_ :_ :_ :_ :_ :_ :_ :_ :_ :_
-    :_ :_ :_ :_ :_ :_ :_ :_ :_ :_
-    :_ :_ :_ :_ :_ :_ :x :x :_ :_
-    :_ :_ :_ :_ :_ :_ :x :_ :x :_
-    :_ :_ :_ :_ :_ :_ :x :_ :_ :_
-    :_ :_ :_ :_ :_ :_ :_ :_ :_ :_
-    :_ :_ :_ :_ :_ :_ :_ :_ :_ :_
-    ]
-   3))
+   (load-board (or board "./data/pulsar.edn"))
+   (read-string (or (System/getenv "RATE") "5"))))
