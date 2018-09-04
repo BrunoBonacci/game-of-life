@@ -38,14 +38,29 @@
 ;; (board 5)
 
 
+(defn posision-shift
+  [[w h] i [sx sy]]
+  (let [x (mod i w)
+        y (quot i w)
+        x' (+ x sx)
+        y' (+ y sy)
+        ;; wrapping
+        x' (if (< x' 0)  (+ w x')   x')
+        x' (if (>= x' w) (mod x' w) x')
+        y' (if (< y' 0)  (+ h y')   y')
+        y' (if (>= y' h) (mod y' h) y')]
+    (+ x' (* w y'))))
+
+
 (defn neighbours
   "given a board and linear positions it return the "
   [board i]
-  (let [[size _] (board-shape board)]
+  (let [dim (board-shape board)
+        loc (partial posision-shift dim i)]
     (map (partial get board)
-         [(- i size 1)  (- i size)  (- i size -1)
-          (- i 1)          #_i      (- i -1)
-          (+ i size -1) (+ i size)  (+ i size 1)])))
+         [(loc [-1 -1]) (loc [0 -1]) (loc [+1 -1])
+          (loc [-1 0])    #_i        (loc [+1 0])
+          (loc [-1 +1]) (loc [0 +1]) (loc [+1 +1])])))
 
 
 
@@ -63,7 +78,8 @@
     :_ :_ :_ :_ :_ :_ :_ :_ :_ :_
     :_ :_ :_ :_ :_ :_ :_ :_ :_ :_
     ] 32)
-  )
+
+)
 
 
 (defn cell-transition
@@ -112,8 +128,7 @@
    (iterate transition)
    (map display)
    (take 50)
-   (run! #(println % "\n\n"))
-   )
+   (run! #(println % "\n\n")))
 
   )
 
