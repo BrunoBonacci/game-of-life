@@ -22,10 +22,17 @@
   )
 
 
-(defn board [width height]
-  (with-meta
-    (apply vector (repeat (* width height) :_))
-    {:dim [width height]}))
+(defn board
+  ([width height]
+   (board width height 0))
+  ([width height pct-alive]
+   (let [n-alive (* width height pct-alive 1/100)
+         n-dead  (- (* width height) n-alive)]
+     (with-meta
+       (->> (concat (repeat n-alive :x) (repeat n-dead :_))
+          (shuffle)
+          (apply vector))
+       {:dim [width height]}))))
 
 ;; (board 5 10)
 ;; (meta (board 5 10))
@@ -157,7 +164,12 @@
   (read-string (slurp file)))
 
 
-(defn -main [& [board]]
+(defn opt [name default]
+  (or (some-> (System/getenv name) read-string) default))
+
+(defn -main [& [board-file]]
   (term-display
-   (load-board (or board "./data/pulsar.edn"))
-   (read-string (or (System/getenv "RATE") "5"))))
+   (if (= "-random" board-file)
+     (board 35 35 (opt "PCT_ALIVE" 30))
+     (load-board (or board-file "./data/pulsar.edn")))
+   (opt "RATE" 5)))
