@@ -4,7 +4,7 @@
 
 (comment
   ;;
-  ;; example of a board, assumed squared
+  ;; example of a board
   ;; :_ -> empty cell
   ;; :x -> living cell
   ;;
@@ -22,20 +22,23 @@
   )
 
 
-(defn board [size]
-  (apply vector (repeat (* size size) :_)))
+(defn board [width height]
+  (with-meta
+    (apply vector (repeat (* width height) :_))
+    {:dim [width height]}))
 
-;; (board 5)
+;; (board 5 10)
+;; (meta (board 5 10))
+
 
 (defn board-shape
   [board]
-  (let [e (int (Math/sqrt (count board)))]
-    [e e]))
+  (-> board meta :dim))
 
 
-;; (board-shape (board 10))
+;; (board-shape (board 10 20))
 
-;; (board 5)
+;; (board-shape (board 5 5))
 
 
 (defn posision-shift
@@ -67,6 +70,7 @@
 (comment
   ;; returns the neighbours of :x
   (neighbours
+   ^{:dim [10 10]}
    [:_ :_ :_ :_ :_ :_ :_ :_ :_ :_
     :_ :_ :_ :_ :_ :_ :_ :_ :_ :_
     :_ :ul :uc :ur :_ :_ :_ :_ :_ :_
@@ -95,18 +99,20 @@
 
 (defn transition
   [board]
-  (mapv (partial cell-transition board) (range (count board))))
+  (with-meta
+    (mapv (partial cell-transition board) (range (count board)))
+    (meta board)))
 
 
 (defn display
   [board & {:keys [live empty sep]
             :or {live ":x" empty ":_" sep " "}}]
-  (let [[size _] (board-shape board)
+  (let [[w h] (board-shape board)
         fmt {:_ empty
              :x live}]
     (->> board
        (map fmt)
-       (partition size)
+       (partition w)
        (map (partial str/join sep))
        (str/join "\n"))))
 
@@ -114,6 +120,7 @@
 (comment
 
   (->>
+   ^{:dim [10 10]}
    [:_ :_ :_ :_ :_ :_ :_ :_ :_ :_
     :_ :_ :_ :_ :_ :_ :_ :_ :_ :_
     :_ :_ :_ :_ :_ :_ :_ :_ :_ :_
