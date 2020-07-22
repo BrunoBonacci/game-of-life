@@ -152,9 +152,13 @@
   (let [delay (quot 1000 rate)
         clear-screen (str "\033[2J")]
     (loop [board board]
-      (println clear-screen "Press Ctrl-C to stop.\n")
-      (println (display board :live "##" :empty "__" :sep "|"))
-      (println "\n\n")
+      ;; painting the whole screen at once reduce the flickering
+      (println
+        (with-out-str
+          (println clear-screen "Press Ctrl-C to stop.\n")
+          (println (display board :live "##" :empty "__" :sep "|"))
+          (println "\n\n")))
+      (flush)
       (Thread/sleep delay)
       (recur (transition board)))))
 
